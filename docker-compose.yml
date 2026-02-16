@@ -1,0 +1,17 @@
+version: '3.8'
+
+services:
+  backend:
+    build: .
+    container_name: devtrack-backend
+    ports:
+      - "5000:5000"
+    environment:
+      PORT: 5000
+      JWT_SECRET: mysecretkey123
+      DB_HOST: host.docker.internal
+      DB_USER: postgres
+      DB_PASSWORD: Umer@2004
+      DB_NAME: devtrack
+      DB_PORT: 5432
+    restart: always
