@@ -6,10 +6,12 @@ function MyTasks() {
   const [tasks, setTasks] = useState([]);
   const [filter, setFilter] = useState("all");
 
+  const API_URL = import.meta.env.VITE_API_URL;
+
   const fetchTasks = async () => {
     try {
       const res = await fetch(
-        "http://localhost:5000/api/tasks",
+        `${API_URL}/api/tasks`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -19,7 +21,6 @@ function MyTasks() {
 
       const data = await res.json();
       setTasks(data);
-
     } catch (error) {
       console.error("FETCH TASK ERROR:", error);
     }
@@ -32,7 +33,7 @@ function MyTasks() {
   const updateStatus = async (taskId, newStatus) => {
     try {
       await fetch(
-        `http://localhost:5000/api/tasks/${taskId}`,
+        `${API_URL}/api/tasks/${taskId}`,
         {
           method: "PUT",
           headers: {
@@ -44,7 +45,6 @@ function MyTasks() {
       );
 
       fetchTasks();
-
     } catch (error) {
       console.error("UPDATE STATUS ERROR:", error);
     }
@@ -60,7 +60,7 @@ function MyTasks() {
     <div className="p-8">
       <h2 className="text-2xl font-bold mb-6">My Tasks</h2>
 
-      {/* ✅ FILTER DROPDOWN */}
+      {/* FILTER DROPDOWN */}
       <div className="mb-6">
         <select
           value={filter}

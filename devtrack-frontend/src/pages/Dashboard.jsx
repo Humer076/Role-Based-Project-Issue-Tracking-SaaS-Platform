@@ -2,6 +2,10 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
+const api = axios.create({
+  baseURL: import.meta.env.VITE_API_URL,
+});
+
 function Dashboard() {
   const navigate = useNavigate();
   const token = localStorage.getItem("token");
@@ -35,14 +39,13 @@ function Dashboard() {
     }
   }, []);
 
+  const authHeader = {
+    headers: { Authorization: `Bearer ${token}` }
+  };
+
   const fetchDashboardStats = async () => {
     try {
-      const res = await axios.get(
-        "http://localhost:5000/api/dashboard/stats",
-        {
-          headers: { Authorization: `Bearer ${token}` }
-        }
-      );
+      const res = await api.get("/api/dashboard/stats", authHeader);
       setStats(res.data);
     } catch (error) {
       console.error("Dashboard stats error:", error);
@@ -51,12 +54,7 @@ function Dashboard() {
 
   const fetchProjects = async () => {
     try {
-      const res = await axios.get(
-        "http://localhost:5000/api/projects",
-        {
-          headers: { Authorization: `Bearer ${token}` }
-        }
-      );
+      const res = await api.get("/api/projects", authHeader);
       setProjects(res.data);
     } catch (error) {
       console.error(error);
@@ -80,18 +78,11 @@ function Dashboard() {
     }
 
     try {
-      await axios.post(
-        "http://localhost:5000/api/projects",
-        projectForm,
-        {
-          headers: { Authorization: `Bearer ${token}` }
-        }
-      );
+      await api.post("/api/projects", projectForm, authHeader);
 
       setProjectForm({ name: "", description: "" });
       fetchProjects();
       fetchDashboardStats();
-
     } catch (error) {
       alert(error.response?.data?.message || "Failed to create project");
     }
@@ -113,13 +104,7 @@ function Dashboard() {
     }
 
     try {
-      await axios.post(
-        "http://localhost:5000/api/users",
-        devForm,
-        {
-          headers: { Authorization: `Bearer ${token}` }
-        }
-      );
+      await api.post("/api/users", devForm, authHeader);
 
       alert("Developer Created Successfully");
 
@@ -130,7 +115,6 @@ function Dashboard() {
       });
 
       fetchDashboardStats();
-
     } catch (error) {
       alert(error.response?.data?.message || "Failed to create developer");
     }

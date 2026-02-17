@@ -15,11 +15,13 @@ function ProjectDetails() {
   const [description, setDescription] = useState("");
   const [assignedTo, setAssignedTo] = useState("");
 
+  const API_URL = import.meta.env.VITE_API_URL;
+
   /* ================= FETCH TASKS ================= */
   const fetchTasks = async () => {
     try {
       const res = await fetch(
-        `http://localhost:5000/api/tasks?project_id=${id}`,
+        `${API_URL}/api/tasks?project_id=${id}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -35,7 +37,7 @@ function ProjectDetails() {
   const fetchUsers = async () => {
     try {
       const res = await fetch(
-        "http://localhost:5000/api/users",
+        `${API_URL}/api/users`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -62,7 +64,7 @@ function ProjectDetails() {
     }
 
     try {
-      await fetch("http://localhost:5000/api/tasks", {
+      await fetch(`${API_URL}/api/tasks`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -88,7 +90,7 @@ function ProjectDetails() {
   /* ================= UPDATE STATUS ================= */
   const updateStatus = async (taskId, newStatus) => {
     try {
-      await fetch(`http://localhost:5000/api/tasks/${taskId}`, {
+      await fetch(`${API_URL}/api/tasks/${taskId}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",

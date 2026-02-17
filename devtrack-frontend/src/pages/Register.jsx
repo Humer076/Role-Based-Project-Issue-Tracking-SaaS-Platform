@@ -4,6 +4,8 @@ import { useNavigate } from "react-router-dom";
 const Register = () => {
   const navigate = useNavigate();
 
+  const API_URL = import.meta.env.VITE_API_URL;
+
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -22,7 +24,7 @@ const Register = () => {
     e.preventDefault();
 
     try {
-      const response = await fetch("http://localhost:5000/api/auth/register", {
+      const response = await fetch(`${API_URL}/api/auth/register`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
@@ -30,11 +32,7 @@ const Register = () => {
         body: JSON.stringify(formData)
       });
 
-      console.log("STATUS:", response.status);
-
       const text = await response.text();
-      console.log("RAW RESPONSE:", text);
-
       const data = text ? JSON.parse(text) : {};
 
       if (!response.ok) {

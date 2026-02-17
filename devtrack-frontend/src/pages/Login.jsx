@@ -7,12 +7,14 @@ function Login() {
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
 
+  const API_URL = import.meta.env.VITE_API_URL;
+
   const handleLogin = async (e) => {
     e.preventDefault();
 
     try {
       const response = await axios.post(
-        "http://localhost:5000/api/auth/login",
+        `${API_URL}/api/auth/login`,
         { email, password }
       );
 
@@ -35,8 +37,10 @@ function Login() {
       }
 
     } catch (error) {
-      console.error(error);
-      alert("Login failed ❌");
+      console.error("LOGIN ERROR:", error);
+      alert(
+        error.response?.data?.message || "Login failed ❌"
+      );
     }
   };
 

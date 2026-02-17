@@ -2,14 +2,23 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { useLocation } from "react-router-dom";
 
+const api = axios.create({
+  baseURL: import.meta.env.VITE_API_URL,
+});
+
 function Tasks() {
   const [tasks, setTasks] = useState([]);
   const [editingId, setEditingId] = useState(null);
-  const [editTitle, setEditTitle] = useState("");
+  const [editStatus, setEditStatus] = useState("");
+
   const token = localStorage.getItem("token");
   const location = useLocation();
 
   const status = new URLSearchParams(location.search).get("status");
+
+  const authHeader = {
+    headers: { Authorization: `Bearer ${token}` },
+  };
 
   useEffect(() => {
     fetchTasks();
@@ -17,43 +26,34 @@ function Tasks() {
 
   const fetchTasks = async () => {
     try {
-      const res = await axios.get(
-        `http://localhost:5000/api/tasks`,
-        {
-          headers: { Authorization: `Bearer ${token}` }
-        }
-      );
+      const url = status
+        ? `/api/tasks?status=${status}`
+        : `/api/tasks`;
+
+      const res = await api.get(url, authHeader);
       setTasks(res.data);
     } catch (err) {
-      console.error(err);
+      console.error("Fetch tasks error:", err);
     }
   };
 
   // ✅ DELETE TASK
   const handleDelete = async (id) => {
     try {
-      await axios.delete(
-        `http://localhost:5000/api/tasks/${id}`,
-        {
-          headers: { Authorization: `Bearer ${token}` }
-        }
-      );
-
+      await api.delete(`/api/tasks/${id}`, authHeader);
       setTasks((prev) => prev.filter((task) => task.id !== id));
     } catch (err) {
-      console.error(err);
+      console.error("Delete task error:", err);
     }
   };
 
-  // ✅ EDIT TASK
+  // ✅ EDIT TASK (Status Update)
   const handleEdit = async (id) => {
     try {
-      const res = await axios.put(
-        `http://localhost:5000/api/tasks/${id}`,
-        { status: editTitle }, // using status update API
-        {
-          headers: { Authorization: `Bearer ${token}` }
-        }
+      const res = await api.put(
+        `/api/tasks/${id}`,
+        { status: editStatus },
+        authHeader
       );
 
       setTasks((prev) =>
@@ -63,9 +63,9 @@ function Tasks() {
       );
 
       setEditingId(null);
-      setEditTitle("");
+      setEditStatus("");
     } catch (err) {
-      console.error(err);
+      console.error("Edit task error:", err);
     }
   };
 
@@ -84,8 +84,8 @@ function Tasks() {
             {editingId === task.id ? (
               <>
                 <select
-                  value={editTitle}
-                  onChange={(e) => setEditTitle(e.target.value)}
+                  value={editStatus}
+                  onChange={(e) => setEditStatus(e.target.value)}
                   className="border p-2 rounded mr-2"
                 >
                   <option value="pending">pending</option>
@@ -124,7 +124,7 @@ function Tasks() {
                     <button
                       onClick={() => {
                         setEditingId(task.id);
-                        setEditTitle(task.status);
+                        setEditStatus(task.status);
                       }}
                       className="text-blue-600 hover:underline"
                     >
