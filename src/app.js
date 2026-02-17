@@ -5,29 +5,12 @@ const app = express();
 
 /* ==============================
    CORS Configuration
+   (Simple & Production Safe)
 ============================== */
-const allowedOrigins = [
-  "http://localhost:5173",
-  "https://role-based-project-issue-tracking-s.vercel.app"
-];
-
 app.use(cors({
-  origin: function (origin, callback) {
-    // Allow requests with no origin (like Postman, curl, etc.)
-    if (!origin) return callback(null, true);
-
-    if (allowedOrigins.includes(origin)) {
-      return callback(null, true);
-    } else {
-      console.log("Blocked by CORS:", origin);
-      return callback(null, true); // temporarily allow all (safe for now)
-    }
-  },
+  origin: true,      // allow all origins (safe for now)
   credentials: true
 }));
-
-// Handle preflight requests
-app.options('*', cors());
 
 /* ==============================
    Middleware
