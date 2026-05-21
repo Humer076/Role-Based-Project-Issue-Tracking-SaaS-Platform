@@ -4,10 +4,8 @@ const cors = require('cors');
 
 const app = express();
 
-// ✅ SIMPLEST CORS – allow all origins (perfect for debugging)
+// ✅ SIMPLE CORS – enables cross‑origin requests and handles pre‑flight automatically
 app.use(cors());
-app.options('*', cors()); // enable pre-flight for all routes
-
 app.use(express.json());
 
 // Route imports
