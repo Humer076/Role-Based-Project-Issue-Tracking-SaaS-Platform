@@ -1,10 +1,8 @@
 import { Outlet, Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { useState } from 'react';
 
 export default function Layout() {
   const navigate = useNavigate();
-  const [isOpen, setIsOpen] = useState(false);
   const handleLogout = () => {
     localStorage.removeItem('token');
     navigate('/login');
@@ -12,8 +10,8 @@ export default function Layout() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Top Navbar */}
-      <nav className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50">
+      {/* Navbar */}
+      <nav className="bg-white/80 backdrop-blur-sm border-b border-gray-200 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16">
             <div className="flex items-center">
@@ -28,16 +26,14 @@ export default function Layout() {
                 <Link to="/developers" className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md transition">Developers</Link>
               </div>
             </div>
-            <div className="flex items-center">
-              <button onClick={handleLogout} className="text-red-600 hover:text-red-800 px-3 py-2 rounded-md transition">
-                Logout
-              </button>
-            </div>
+            <button onClick={handleLogout} className="text-red-600 hover:text-red-800 px-3 py-2 rounded-md transition">
+              Logout
+            </button>
           </div>
         </div>
       </nav>
 
-      {/* Main Content with animation */}
+      {/* Main content with fade-in animation */}
       <motion.main
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
