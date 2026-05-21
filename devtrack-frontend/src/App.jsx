@@ -1,100 +1,23 @@
-import ProtectedRoute from "./components/ProtectedRoute";
-import Layout from "./components/Layout";
-
-import MyTasks from "./pages/MyTasks";
-import Register from "./pages/Register";
-import ProjectDetails from "./pages/ProjectDetails";
-import Login from "./pages/Login";
-import Dashboard from "./pages/Dashboard";
-
-import Projects from "./pages/Projects";
-import Tasks from "./pages/Tasks";
-import Developers from "./pages/Developers";
-
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import Dashboard from './pages/Dashboard';
+import Projects from './pages/Projects';
+import Issues from './pages/Issues';
+import Navbar from './components/Navbar';
 
 function App() {
   return (
-    <div className="min-h-screen bg-gray-100 text-gray-900">
-      <Router>
-        <Routes>
-          <Route path="/" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-
-          {/* DASHBOARD */}
-          <Route
-            path="/dashboard"
-            element={
-              <ProtectedRoute>
-                <Layout>
-                  <Dashboard />
-                </Layout>
-              </ProtectedRoute>
-            }
-          />
-
-          {/* MY TASKS */}
-          <Route
-            path="/my-tasks"
-            element={
-              <ProtectedRoute>
-                <Layout>
-                  <MyTasks />
-                </Layout>
-              </ProtectedRoute>
-            }
-          />
-
-          {/* PROJECT DETAILS */}
-          <Route
-            path="/projects/:id"
-            element={
-              <ProtectedRoute>
-                <Layout>
-                  <ProjectDetails />
-                </Layout>
-              </ProtectedRoute>
-            }
-          />
-
-          {/* ALL PROJECTS */}
-          <Route
-            path="/projects"
-            element={
-              <ProtectedRoute>
-                <Layout>
-                  <Projects />
-                </Layout>
-              </ProtectedRoute>
-            }
-          />
-
-          {/* ALL TASKS */}
-          <Route
-            path="/tasks"
-            element={
-              <ProtectedRoute>
-                <Layout>
-                  <Tasks />
-                </Layout>
-              </ProtectedRoute>
-            }
-          />
-
-          {/* ALL DEVELOPERS */}
-          <Route
-            path="/developers"
-            element={
-              <ProtectedRoute>
-                <Layout>
-                  <Developers />
-                </Layout>
-              </ProtectedRoute>
-            }
-          />
-        </Routes>
-      </Router>
-    </div>
+    <Router>
+      <div className="min-h-screen bg-gray-50">
+        <Navbar />
+        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <Routes>
+            <Route path="/" element={<Dashboard />} />
+            <Route path="/projects" element={<Projects />} />
+            <Route path="/issues" element={<Issues />} />
+          </Routes>
+        </main>
+      </div>
+    </Router>
   );
 }
 
