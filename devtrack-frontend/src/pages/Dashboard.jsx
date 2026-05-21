@@ -1,283 +1,77 @@
-import { useEffect, useState } from "react";
-import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
+import axios from 'axios';
 
-const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL,
-});
+const API = import.meta.env.VITE_API_URL;
 
-function Dashboard() {
-  const navigate = useNavigate();
-  const token = localStorage.getItem("token");
-
-  const decoded = token ? JSON.parse(atob(token.split(".")[1])) : null;
-  const userRole = decoded?.role;
-
-  const [projects, setProjects] = useState([]);
-  const [stats, setStats] = useState(null);
-
-  const [projectForm, setProjectForm] = useState({
-    name: "",
-    description: ""
-  });
-
-  const [devForm, setDevForm] = useState({
-    name: "",
-    email: "",
-    password: ""
-  });
+export default function Dashboard() {
+  const [stats, setStats] = useState({ projects: 0, issues: 0, users: 0 });
+  const [recentIssues, setRecentIssues] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!token) {
-      navigate("/");
-      return;
-    }
-
-    fetchProjects();
-    if (userRole === "admin") {
-      fetchDashboardStats();
-    }
+    const fetchData = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        const headers = { Authorization: `Bearer ${token}` };
+        const [statsRes, issuesRes] = await Promise.all([
+          axios.get(`${API}/api/stats`, { headers }),
+          axios.get(`${API}/api/issues/recent`, { headers })
+        ]);
+        setStats(statsRes.data);
+        setRecentIssues(issuesRes.data);
+      } catch (error) {
+        console.error('Failed to fetch dashboard data', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
   }, []);
 
-  const authHeader = {
-    headers: { Authorization: `Bearer ${token}` }
-  };
-
-  const fetchDashboardStats = async () => {
-    try {
-      const res = await api.get("/api/dashboard/stats", authHeader);
-      setStats(res.data);
-    } catch (error) {
-      console.error("Dashboard stats error:", error);
-    }
-  };
-
-  const fetchProjects = async () => {
-    try {
-      const res = await api.get("/api/projects", authHeader);
-      setProjects(res.data);
-    } catch (error) {
-      console.error(error);
-      alert("Failed to fetch projects");
-    }
-  };
-
-  const handleProjectChange = (e) => {
-    setProjectForm({
-      ...projectForm,
-      [e.target.name]: e.target.value
-    });
-  };
-
-  const createProject = async (e) => {
-    e.preventDefault();
-
-    if (!projectForm.name.trim() || !projectForm.description.trim()) {
-      alert("Please enter both project name and description");
-      return;
-    }
-
-    try {
-      await api.post("/api/projects", projectForm, authHeader);
-
-      setProjectForm({ name: "", description: "" });
-      fetchProjects();
-      fetchDashboardStats();
-    } catch (error) {
-      alert(error.response?.data?.message || "Failed to create project");
-    }
-  };
-
-  const handleDevChange = (e) => {
-    setDevForm({
-      ...devForm,
-      [e.target.name]: e.target.value
-    });
-  };
-
-  const createDeveloper = async (e) => {
-    e.preventDefault();
-
-    if (!devForm.name || !devForm.email || !devForm.password) {
-      alert("All fields required");
-      return;
-    }
-
-    try {
-      await api.post("/api/users", devForm, authHeader);
-
-      alert("Developer Created Successfully");
-
-      setDevForm({
-        name: "",
-        email: "",
-        password: ""
-      });
-
-      fetchDashboardStats();
-    } catch (error) {
-      alert(error.response?.data?.message || "Failed to create developer");
-    }
-  };
-
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    navigate("/");
-  };
+  if (loading) return <div className="flex justify-center items-center h-64">Loading...</div>;
 
   return (
-    <div style={{ padding: "40px", fontFamily: "Arial" }}>
-      <h1>DevTrack Dashboard 🚀</h1>
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5 }}>
+      <h1 className="text-2xl font-bold mb-6">Dashboard</h1>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+        <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+          <h3 className="text-gray-500 text-sm uppercase">Total Projects</h3>
+          <p className="text-3xl font-bold mt-2">{stats.projects}</p>
+        </div>
+        <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+          <h3 className="text-gray-500 text-sm uppercase">Open Issues</h3>
+          <p className="text-3xl font-bold mt-2">{stats.issues}</p>
+        </div>
+        <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+          <h3 className="text-gray-500 text-sm uppercase">Team Members</h3>
+          <p className="text-3xl font-bold mt-2">{stats.users}</p>
+        </div>
+      </div>
 
-      <button onClick={handleLogout} style={{ marginBottom: "20px" }}>
-        Logout
-      </button>
-
-      <hr />
-
-      {userRole === "admin" && stats && (
-        <>
-          <h2>Dashboard Overview</h2>
-
-          <div style={{ display: "flex", gap: "20px", marginBottom: "30px" }}>
-            <StatCard
-              title="Total Projects"
-              value={stats.totalProjects}
-              onClick={() => navigate("/projects")}
-            />
-
-            <StatCard
-              title="Total Developers"
-              value={stats.totalDevelopers}
-              onClick={() => navigate("/developers")}
-            />
-
-            <StatCard
-              title="Total Tasks"
-              value={stats.totalTasks}
-              onClick={() => navigate("/tasks")}
-            />
-
-            <StatCard
-              title="Pending Tasks"
-              value={stats.pendingTasks}
-              onClick={() => navigate("/tasks?status=pending")}
-            />
-
-            <StatCard
-              title="Completed Tasks"
-              value={stats.completedTasks}
-              onClick={() => navigate("/tasks?status=completed")}
-            />
-          </div>
-        </>
-      )}
-
-      {userRole === "admin" && (
-        <>
-          <h2>Create Project</h2>
-
-          <form onSubmit={createProject}>
-            <input
-              type="text"
-              name="name"
-              placeholder="Project Name"
-              value={projectForm.name}
-              onChange={handleProjectChange}
-            />
-            <br /><br />
-
-            <input
-              type="text"
-              name="description"
-              placeholder="Project Description"
-              value={projectForm.description}
-              onChange={handleProjectChange}
-            />
-            <br /><br />
-
-            <button type="submit">Create Project</button>
-          </form>
-
-          <hr />
-
-          <h2>Add Developer</h2>
-
-          <form onSubmit={createDeveloper}>
-            <input
-              type="text"
-              name="name"
-              placeholder="Developer Name"
-              value={devForm.name}
-              onChange={handleDevChange}
-            />
-            <br /><br />
-
-            <input
-              type="email"
-              name="email"
-              placeholder="Developer Email"
-              value={devForm.email}
-              onChange={handleDevChange}
-            />
-            <br /><br />
-
-            <input
-              type="password"
-              name="password"
-              placeholder="Password"
-              value={devForm.password}
-              onChange={handleDevChange}
-            />
-            <br /><br />
-
-            <button type="submit">Create Developer</button>
-          </form>
-
-          <hr />
-        </>
-      )}
-
-      <h2>Your Projects</h2>
-
-      {projects.length === 0 ? (
-        <p>No projects found</p>
-      ) : (
-        <ul>
-          {projects.map((project) => (
-            <li
-              key={project.id}
-              style={{ cursor: "pointer", marginBottom: "10px" }}
-              onClick={() => navigate(`/projects/${project.id}`)}
-            >
-              <strong>{project.name}</strong> — {project.description}
-            </li>
-          ))}
-        </ul>
-      )}
-    </div>
+      <div className="bg-white rounded-xl shadow-sm p-6">
+        <h2 className="text-lg font-semibold mb-4">Recent Issues</h2>
+        <div className="overflow-x-auto">
+          <table className="min-w-full">
+            <thead>
+              <tr className="border-b">
+                <th className="text-left py-2">Title</th>
+                <th className="text-left py-2">Status</th>
+                <th className="text-left py-2">Priority</th>
+               </tr>
+            </thead>
+            <tbody>
+              {recentIssues.map(issue => (
+                <tr key={issue.id} className="border-b hover:bg-gray-50">
+                  <td className="py-2">{issue.title}</td>
+                  <td><span className={`px-2 py-1 rounded-full text-xs ${issue.status === 'open' ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800'}`}>{issue.status}</span></td>
+                  <td className="capitalize">{issue.priority}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </motion.div>
   );
 }
-
-function StatCard({ title, value, onClick }) {
-  return (
-    <div
-      onClick={onClick}
-      style={{
-        background: "#ffffff",
-        padding: "20px",
-        borderRadius: "8px",
-        boxShadow: "0 2px 10px rgba(0,0,0,0.1)",
-        minWidth: "160px",
-        textAlign: "center",
-        cursor: "pointer",
-        transition: "0.2s"
-      }}
-    >
-      <h4>{title}</h4>
-      <h2>{value}</h2>
-    </div>
-  );
-}
-
-export default Dashboard;
