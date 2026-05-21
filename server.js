@@ -1,9 +1,20 @@
-const express = require('express');
-const app = express();
-const PORT = process.env.PORT || 10000;
+require('dotenv').config();
 
-app.get('/', (req, res) => { res.status(200).send('Hello from DevTrack!'); });
+const app = require('./src/app');
+const pool = require('./src/config/db');
 
-const server = app.listen(PORT, () => {
-  console.log(`✅ Minimal test server running on port ${PORT}`);
+const PORT = process.env.PORT || 5000;
+
+// Database Connection Check
+pool.connect()
+  .then(() => {
+    console.log('Database connected successfully ✅');
+  })
+  .catch((err) => {
+    console.error('Database connection failed ❌', err);
+  });
+
+// Start Server
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
 });
