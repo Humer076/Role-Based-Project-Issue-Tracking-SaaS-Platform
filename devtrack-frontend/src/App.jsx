@@ -1,28 +1,34 @@
-import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
-
-function Home() {
-  return <div className="p-8"><h1 className="text-2xl font-bold">Home Page</h1></div>;
-}
-
-function About() {
-  return <div className="p-8"><h1 className="text-2xl font-bold">About Page</h1></div>;
-}
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+import Layout from './components/Layout'
+import ProtectedRoute from './components/ProtectedRoute'
+import Dashboard from './pages/Dashboard'
+import Projects from './pages/Projects'
+import ProjectDetails from './pages/ProjectDetails'
+import Tasks from './pages/Tasks'
+import MyTasks from './pages/MyTasks'
+import Developers from './pages/Developers'
+import Login from './pages/Login'
+import Register from './pages/Register'
 
 function App() {
   return (
     <Router>
-      <div className="p-4">
-        <nav className="space-x-4 mb-4">
-          <Link to="/" className="text-blue-600 hover:underline">Home</Link>
-          <Link to="/about" className="text-blue-600 hover:underline">About</Link>
-        </nav>
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/about" element={<About />} />
-        </Routes>
-      </div>
+      <Routes>
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+        <Route element={<ProtectedRoute />}>
+          <Route element={<Layout />}>
+            <Route path="/" element={<Dashboard />} />
+            <Route path="/projects" element={<Projects />} />
+            <Route path="/projects/:id" element={<ProjectDetails />} />
+            <Route path="/tasks" element={<Tasks />} />
+            <Route path="/my-tasks" element={<MyTasks />} />
+            <Route path="/developers" element={<Developers />} />
+          </Route>
+        </Route>
+      </Routes>
     </Router>
-  );
+  )
 }
 
-export default App;
+export default App
