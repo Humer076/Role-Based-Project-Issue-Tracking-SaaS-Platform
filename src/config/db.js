@@ -1,12 +1,23 @@
 const { Pool } = require('pg');
 
+// TEMPORARY HARDCODED CONNECTION – FOR TESTING ONLY
 const pool = new Pool({
-  host: process.env.DB_HOST,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME,
-  port: process.env.DB_PORT || 5432,
+  host: 'aws-1-ap-southeast-1.pooler.supabase.com',
+  user: 'postgres.atdcbvqlqmofzubbzyyi',
+  password: 'DevTrackProject2025',
+  database: 'postgres',
+  port: 5432,
   ssl: { rejectUnauthorized: false }
+});
+
+// Test connection immediately
+pool.connect((err, client, release) => {
+  if (err) {
+    console.error('❌ Database connection failed:', err.message);
+  } else {
+    console.log('✅ Database connected successfully!');
+    release();
+  }
 });
 
 module.exports = pool;
