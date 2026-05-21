@@ -4,21 +4,27 @@ const cors = require('cors');
 
 const app = express();
 
-// CORS – allow your Vercel frontend (change the URL to yours)
+// --- CORS CONFIGURATION (UPDATED) ---
+// List the frontend URLs that are allowed to talk to this backend.
+// Include your local development URL and your live Vercel URL.
 const allowedOrigins = [
-  'http://localhost:5173',
-  'https://role-based-project-issue-tracking-saa-s-platform-4uy2.vercel.app', // change to your actual Vercel URL
-  'https://role-based-project-issue-tracking-saas-0vo9.onrender.com' // your backend itself
+  'http://localhost:5173', // For local React development
+  'https://role-based-project-issue-tracking-saa-s-platform-4uy2.vercel.app', // Your Vercel frontend URL
 ];
+
+// The `cors()` middleware will now check the incoming request's Origin header
+// against the list above. If it matches, the request is allowed.
 app.use(cors({
-  origin: function(origin, callback) {
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps, curl, server-to-server)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.indexOf(origin) === -1) {
+      const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
+      return callback(new Error(msg), false);
     }
+    return callback(null, true);
   },
-  credentials: true
+  credentials: true, // Important for sending cookies/auth headers
 }));
 
 app.use(express.json());
@@ -44,4 +50,4 @@ app.get('/', (req, res) => {
   res.send('DevTrack API running 🚀');
 });
 
-module.exports = app;
+module.exports = app; 
