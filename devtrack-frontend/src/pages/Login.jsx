@@ -1,88 +1,82 @@
-import { useState } from "react";
-import axios from "axios";
-import { useNavigate, Link } from "react-router-dom";
+import { useState } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
+import axios from 'axios'
+import { motion } from 'framer-motion'
 
-function Login() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const navigate = useNavigate();
+const API = import.meta.env.VITE_API_URL
 
-  const API_URL = import.meta.env.VITE_API_URL;
+export default function Login() {
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [error, setError] = useState('')
+  const [loading, setLoading] = useState(false)
+  const navigate = useNavigate()
 
-  const handleLogin = async (e) => {
-    e.preventDefault();
-
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    setError('')
+    setLoading(true)
     try {
-      const response = await axios.post(
-        `${API_URL}/api/auth/login`,
-        { email, password }
-      );
-
-      const token = response.data.token;
-
-      // ✅ Save token
-      localStorage.setItem("token", token);
-
-      // ✅ Decode token
-      const decoded = JSON.parse(atob(token.split(".")[1]));
-      const role = decoded.role;
-
-      alert("Login successful ✅");
-
-      // 🔥 Role based redirect
-      if (role === "developer") {
-        navigate("/my-tasks");
-      } else {
-        navigate("/dashboard");
-      }
-
-    } catch (error) {
-      console.error("LOGIN ERROR:", error);
-      alert(
-        error.response?.data?.message || "Login failed ❌"
-      );
+      const res = await axios.post(`${API}/api/auth/login`, { email, password })
+      localStorage.setItem('token', res.data.token)
+      navigate('/')
+    } catch (err) {
+      setError(err.response?.data?.message || 'Login failed')
+    } finally {
+      setLoading(false)
     }
-  };
+  }
 
   return (
-    <div style={{ padding: "40px" }}>
-      <h2>DevTrack Login</h2>
-
-      <form onSubmit={handleLogin}>
-        <div>
-          <input
-            type="email"
-            placeholder="Enter email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="bg-white rounded-2xl shadow-xl p-8 max-w-md w-full"
+      >
+        <div className="text-center mb-8">
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">DevTrack</h1>
+          <p className="text-gray-500 mt-2">Sign in to your account</p>
         </div>
 
-        <br />
+        {error && <div className="bg-red-50 text-red-600 p-3 rounded-lg mb-4 text-sm">{error}</div>}
 
-        <div>
-          <input
-            type="password"
-            placeholder="Enter password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
-        </div>
+        <form onSubmit={handleSubmit} className="space-y-5">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
+              placeholder="you@example.com"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
+            />
+          </div>
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 rounded-lg transition disabled:opacity-50"
+          >
+            {loading ? 'Signing in...' : 'Sign In'}
+          </button>
+        </form>
 
-        <br />
-
-        <button type="submit">Login</button>
-      </form>
-
-      <br />
-
-      <p>
-        Don't have an account? <Link to="/register">Register</Link>
-      </p>
+        <p className="text-center text-sm text-gray-500 mt-6">
+          Don't have an account?{' '}
+          <Link to="/register" className="text-blue-600 hover:underline">Register</Link>
+        </p>
+      </motion.div>
     </div>
-  );
+  )
 }
-
-export default Login;
