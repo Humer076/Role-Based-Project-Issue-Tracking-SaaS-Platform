@@ -28,13 +28,22 @@ exports.register = async (req, res) => {
       return res.status(400).json({ message: 'Email already registered' });
     }
 
-    // Create organization
-    const orgResult = await client.query(
-      'INSERT INTO organizations (name) VALUES ($1) RETURNING id',
+    // ✅ Get or create organization (avoids duplicate key error)
+    let orgResult = await client.query(
+      'SELECT id FROM organizations WHERE name = $1',
       [organizationName]
     );
-
-    const organizationId = orgResult.rows[0].id;
+    let organizationId;
+    if (orgResult.rows.length === 0) {
+      // Create new organization
+      const newOrg = await client.query(
+        'INSERT INTO organizations (name) VALUES ($1) RETURNING id',
+        [organizationName]
+      );
+      organizationId = newOrg.rows[0].id;
+    } else {
+      organizationId = orgResult.rows[0].id;
+    }
 
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -72,7 +81,6 @@ exports.register = async (req, res) => {
     await client.query('ROLLBACK');
     console.error("REGISTER ERROR FULL:", error);
 
-    // Return actual error message for debugging
     res.status(500).json({
       message: error.message,
       detail: error.detail || null,
