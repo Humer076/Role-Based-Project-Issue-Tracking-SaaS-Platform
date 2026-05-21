@@ -4,24 +4,9 @@ const cors = require('cors');
 
 const app = express();
 
-// CORS – add ALL your Vercel frontend URLs here
-const allowedOrigins = [
-  'http://localhost:5173',
-  'https://role-based-project-issue-tracking-saa-s-platform-4uy2.vercel.app',
-  'https://role-based-project-issue-tracking-s-blue-three.vercel.app', // current one
-];
-
-app.use(cors({
-  origin: function(origin, callback) {
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      console.log('Blocked origin:', origin);
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
-  credentials: true
-}));
+// ✅ SIMPLEST CORS – allow all origins (perfect for debugging)
+app.use(cors());
+app.options('*', cors()); // enable pre-flight for all routes
 
 app.use(express.json());
 
@@ -33,6 +18,7 @@ const taskRoutes = require('./routes/task.routes');
 const userRoutes = require('./routes/user.routes');
 const dashboardRoutes = require('./routes/dashboardRoutes');
 
+// API routes
 app.use('/api/auth', authRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/projects', projectRoutes);
@@ -40,6 +26,7 @@ app.use('/api/tasks', taskRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 
+// Health check
 app.get('/', (req, res) => {
   res.send('DevTrack API running 🚀');
 });
