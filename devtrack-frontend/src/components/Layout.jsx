@@ -1,95 +1,51 @@
-import { Link, useNavigate, useLocation } from "react-router-dom";
+import { Outlet, Link, useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
+import { useState } from 'react';
 
-function Layout({ children }) {
+export default function Layout() {
   const navigate = useNavigate();
-  const location = useLocation();
-
-  // 🔐 Get role from token
-  const token = localStorage.getItem("token");
-  const decoded = token ? JSON.parse(atob(token.split(".")[1])) : null;
-  const role = decoded?.role;
-
+  const [isOpen, setIsOpen] = useState(false);
   const handleLogout = () => {
-    localStorage.removeItem("token");
-    navigate("/");
+    localStorage.removeItem('token');
+    navigate('/login');
   };
 
-  const linkClass = (path) =>
-    `block px-4 py-3 rounded-md text-base font-medium transition ${
-      location.pathname === path
-        ? "bg-blue-600 text-white"
-        : "text-gray-700 hover:bg-gray-100"
-    }`;
-
   return (
-    <div className="min-h-screen flex bg-gray-100">
-
-      {/* SIDEBAR */}
-      <div className="w-64 bg-white shadow-lg p-6 flex flex-col">
-
-        {/* Logo */}
-        <h1 className="text-2xl font-bold mb-10">
-          DevTrack 🚀
-        </h1>
-
-        {/* Navigation Links */}
-        <div className="space-y-6 flex-1">
-
-          {/* 👑 ADMIN MENU */}
-          {role === "admin" && (
-            <>
-              <Link to="/dashboard" className={linkClass("/dashboard")}>
-                Dashboard
+    <div className="min-h-screen bg-gray-50">
+      {/* Top Navbar */}
+      <nav className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between h-16">
+            <div className="flex items-center">
+              <Link to="/" className="text-xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+                DevTrack
               </Link>
-
-              <Link to="/projects" className={linkClass("/projects")}>
-                Projects
-              </Link>
-
-              <Link to="/tasks" className={linkClass("/tasks")}>
-                Tasks
-              </Link>
-
-              <Link to="/developers" className={linkClass("/developers")}>
-                Developers
-              </Link>
-            </>
-          )}
-
-          {/* 👨‍💻 DEVELOPER MENU */}
-          {role === "developer" && (
-            <>
-              <Link to="/dashboard" className={linkClass("/dashboard")}>
-                Dashboard
-              </Link>
-
-              <Link to="/my-tasks" className={linkClass("/my-tasks")}>
-                My Tasks
-              </Link>
-            </>
-          )}
-
+              <div className="hidden md:flex ml-10 space-x-4">
+                <Link to="/" className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md transition">Dashboard</Link>
+                <Link to="/projects" className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md transition">Projects</Link>
+                <Link to="/tasks" className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md transition">All Tasks</Link>
+                <Link to="/my-tasks" className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md transition">My Tasks</Link>
+                <Link to="/developers" className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md transition">Developers</Link>
+              </div>
+            </div>
+            <div className="flex items-center">
+              <button onClick={handleLogout} className="text-red-600 hover:text-red-800 px-3 py-2 rounded-md transition">
+                Logout
+              </button>
+            </div>
+          </div>
         </div>
+      </nav>
 
-        {/* Logout Button */}
-        <button
-          onClick={handleLogout}
-          className="mt-auto bg-red-500 text-white py-2 rounded-md hover:bg-red-600 transition"
-        >
-          Logout
-        </button>
-
-      </div>
-
-      {/* MAIN CONTENT */}
-      <div className="flex-1 p-10">
-        <div className="bg-white rounded-xl shadow-md p-8 min-h-[80vh]">
-          {children}
-        </div>
-      </div>
-
+      {/* Main Content with animation */}
+      <motion.main
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4 }}
+        className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8"
+      >
+        <Outlet />
+      </motion.main>
     </div>
   );
 }
-
-export default Layout;
