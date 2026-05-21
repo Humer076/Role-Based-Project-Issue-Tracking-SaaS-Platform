@@ -4,27 +4,23 @@ const cors = require('cors');
 
 const app = express();
 
-// --- CORS CONFIGURATION (UPDATED) ---
-// List the frontend URLs that are allowed to talk to this backend.
-// Include your local development URL and your live Vercel URL.
+// CORS – add ALL your Vercel frontend URLs here
 const allowedOrigins = [
-  'http://localhost:5173', // For local React development
-  'https://role-based-project-issue-tracking-saa-s-platform-4uy2.vercel.app', // Your Vercel frontend URL
+  'http://localhost:5173',
+  'https://role-based-project-issue-tracking-saa-s-platform-4uy2.vercel.app',
+  'https://role-based-project-issue-tracking-s-blue-three.vercel.app', // current one
 ];
 
-// The `cors()` middleware will now check the incoming request's Origin header
-// against the list above. If it matches, the request is allowed.
 app.use(cors({
-  origin: function (origin, callback) {
-    // Allow requests with no origin (like mobile apps, curl, server-to-server)
-    if (!origin) return callback(null, true);
-    if (allowedOrigins.indexOf(origin) === -1) {
-      const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
-      return callback(new Error(msg), false);
+  origin: function(origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      console.log('Blocked origin:', origin);
+      callback(new Error('Not allowed by CORS'));
     }
-    return callback(null, true);
   },
-  credentials: true, // Important for sending cookies/auth headers
+  credentials: true
 }));
 
 app.use(express.json());
@@ -37,7 +33,6 @@ const taskRoutes = require('./routes/task.routes');
 const userRoutes = require('./routes/user.routes');
 const dashboardRoutes = require('./routes/dashboardRoutes');
 
-// API routes
 app.use('/api/auth', authRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/projects', projectRoutes);
@@ -45,9 +40,8 @@ app.use('/api/tasks', taskRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 
-// Health check
 app.get('/', (req, res) => {
   res.send('DevTrack API running 🚀');
 });
 
-module.exports = app; 
+module.exports = app;
